@@ -25,15 +25,27 @@
                 <h3>Step 1: Getting the data</h2>
 
                     We will use MNIST dataset to train our model.
-                    The MNIST database of handwritten digits has a training set of 60,000 examples, 
-                    and a test set of 10,000 examples. 
-                    It is a subset of a larger set available from NIST. 
-                    The digits have been size-normalized and centered in a fixed-size image.
+                    The MNIST database of handwritten digits has a training set of 60,000 examples, and a test set of 10,000 examples. 
+                    The digits have been size-normalized and centered in a fixed-size image. The images are greyscale and 28 by 28 pixels in size. 
+                    <br><br>
+                    These images are scanned handwriting samples from 250 people, half of whom were US Census Bureau employees, and half of whom were high school students.
+                     
+                    The test dataset is made up of digits written by a  different set of 250 people than the original training data (albeit still a group split between Census Bureau employees and high school students). This helps give us confidence that our system can recognize digits from people whose writing it didn't see during training (The model is trained on the training data and the evaluated on the test data).
 
-                    It is a good database for people who want to try learning techniques and 
-                    pattern recognition methods on real-world data while spending minimal efforts on preprocessing and formatting.
+                    <br><br>
+                    The images in the dataset look like this:  
+                    <br>
+                    <img src="images/handwritten_digit_mnist_example.png">
                     
+                    <br><br>
+                    We will use keras to implement the model and to load,preprocess the data. We use keras because is a simple (and fast!) to use library which allows us to develop deep learning models without having to implement everything on our own. If you are really just starting out, implementing some of the basic things that keras automatically takes care of, like backtracking and gradient computation, can be helpful in understand how the neural networks actually work. Refer to <a href="https://colab.research.google.com/drive/15L51sdwIeylKQV-BZm2wCEfR9dJT7-Zi?usp=sharing" target="_blank">this</a> notebook to learn how to do these things on your own (without relying on a library). 
                     
+                    <br><br>
+                    We can load the dataset directly from keras, since keras includes a few dataset and MNIST happens to be a part of it. 
+                    <br><br>
+                    <code>
+                        (x_train, y_train), (x_test, y_test) = keras.datasets.mnist.load_data(); 
+                    </code>
             </p>
           
         </article>
