@@ -43,9 +43,7 @@
                     <br><br>
                     We can load the dataset directly from keras, since keras includes a few dataset and MNIST happens to be a part of it. 
                     <br><br>
-                    <div class="code">
-                        (x_train, y_train), (x_test, y_test) = keras.datasets.mnist.load_data(); 
-                    </div>
+                    <code>(x_train, y_train), (x_test, y_test) = keras.datasets.mnist.load_data();</code>
             </p>
 
             <br>
@@ -58,26 +56,24 @@
             <br><br>
             <code>print(x_train.shape)
                 print(x_train[0].shape) 
-                print(x_train[0])
-            </code>
+                print(x_train[0])</code>
 
             <output>(60000, 28, 28) 
                     (28, 28) 
                     ...
                     [  0   0   0   0   0   0   0   0   0   0   0   0   3  18  18  18 126 136
                     175  26 166 255 247 127   0   0   0   0] 
-                    ... 
-            </output>
+                    ...</output>
             <br>
             This shows that our training data has 60000 images of 28*28 pixel values, with pixel values ranging from 0-255. Lets print one of the images.
 
             <br><br>
             <code>from matplotlib import pyplot
 
-                pyplot.imshow(x_train[0], cmap=pyplot.get_cmap('gray'))
-                <comment>#cmap indicates color map (scheme).</comment>
-                pyplot.show()
-            </code>
+                    pyplot.imshow(x_train[0], cmap=pyplot.get_cmap('gray'))
+                    <comment>#cmap indicates color map (scheme).</comment>
+                    pyplot.show()
+                    </code>
 
             <output>
                     <img src="images/handwritten_digit_mnist_code_2.png">
@@ -101,42 +97,41 @@
             <br>
             <code>inputs = keras.Input(shape = (28,28))
 
-            x = keras.layers.Rescaling(1.0 / 255) (inputs) <comment>#This is used to change the range of inputs. When we rescale our input (which is in range [0,255]) by 1/255, our inputs get translated to range [0,1]. </comment>
+                    x = keras.layers.Rescaling(1.0 / 255) (inputs) <comment>#This is used to change the range of inputs. When we rescale our input (which is in range [0,255]) by 1/255, our inputs get translated to range [0,1]. </comment>
 
-            <!-- #print(x.shape)  -->
-            x = keras.layers.Flatten()(x) <comment>#This flattens the input, which means that it converts our 28 * 28 matrix image into a 784 linear array image. </comment>
-            
-            <!-- #print(x.shape) -->
-            x = keras.layers.Dense( 128, activation = "relu" )(x) <comment>#relu ouputs the original input value if it is positive, otherwise it outputs zero </comment>
-            
-            x = keras.layers.Dense( 128, activation = "relu" )(x)
+                    <!-- #print(x.shape)  -->
+                    x = keras.layers.Flatten()(x) <comment>#This flattens the input, which means that it converts our 28 * 28 matrix image into a 784 linear array image. </comment>
 
-            outputs = keras.layers.Dense(10, activation = "softmax")(x) <comment> #10 output because we are categorizing the handwritten digits in 0-9.</comment>
+                    <!-- #print(x.shape) -->
+                    x = keras.layers.Dense( 128, activation = "relu" )(x) <comment>#relu ouputs the original input value if it is positive, otherwise it outputs zero </comment>
 
-            model = keras.Model(inputs, outputs)
-model.summary() 
-            </code>
-            <output style="white-space: pre;">Model: "model"
-                _________________________________________________________________
-                Layer (type)                Output Shape              Param #   
-                =================================
-                 input_1 (InputLayer)        [(None, 28, 28)]          0         
-                                                                                 
-                 rescaling (Rescaling)       (None, 28, 28)            0         
-                                                                                 
-                 flatten (Flatten)           (None, 784)               0         
-                                                                                 
-                 dense (Dense)               (None, 128)               100480    
-                                                                                 
-                 dense_1 (Dense)             (None, 128)               16512     
-                                                                                 
-                 dense_2 (Dense)             (None, 10)                1290      
-                                                                                 
-                ==================================
-                Total params: 118,282
-                Trainable params: 118,282
-                Non-trainable params: 0
-                ______________________________
+                    x = keras.layers.Dense( 128, activation = "relu" )(x)
+
+                    outputs = keras.layers.Dense(10, activation = "softmax")(x) <comment> #10 output because we are categorizing the handwritten digits in 0-9.</comment>
+
+                    model = keras.Model(inputs, outputs)
+                    model.summary()</code>
+            <output class="whitespace">Model: "model"
+        _________________________________________________________________
+        Layer (type)                Output Shape              Param #   
+        =================================
+            input_1 (InputLayer)        [(None, 28, 28)]          0         
+                                                                            
+            rescaling (Rescaling)       (None, 28, 28)            0         
+                                                                            
+            flatten (Flatten)           (None, 784)               0         
+                                                                            
+            dense (Dense)               (None, 128)               100480    
+                                                                            
+            dense_1 (Dense)             (None, 128)               16512     
+                                                                            
+            dense_2 (Dense)             (None, 10)                1290      
+                                                                            
+        ==================================
+        Total params: 118,282
+        Trainable params: 118,282
+        Non-trainable params: 0
+        ______________________________
             </output>
             <br>
             None as the first value in the input shape indicates that the model can take in any number (batch-size) of inputs (with 28 * 28 dimension)
@@ -144,7 +139,7 @@ model.summary()
             <br><br>
             Lets implement the second model. The second model uses CNN  (Convolutional Neural Network) architecture. Convolutional models perform better than traditional dense models on image data. This is because CNN models are translation-invariant (more specifically, the Convolutional layer is translation equivariant) - which means that no matter where an object lies in an image, the model would still be able to detect the object. So, if a person writes a '7' in top right of our 28*28 image, the model would still be able to predict that 7 even if it was only trained on images of '7' where it was written in bottom left of the image.   
 
-<code>model_cnn = keras.Sequential(
+<code class="whitespace">model_cnn = keras.Sequential(
         [
          keras.Input(shape = (28,28,1)),
          layers.Conv2D(32, kernel_size=(3,3), activation="relu"),
@@ -159,11 +154,45 @@ model.summary()
     
     model_cnn.summary()
 </code>
+<output class="whitespace">Model: "sequential"
+        _________________________________________________________________
+        Layer (type)                Output Shape              Param #
+        =======================================
+        conv2d (Conv2D)             (None, 26, 26, 32)        320
+        
+        max_pooling2d (MaxPooling2D  (None, 13, 13, 32)       0
+        )
+        
+        conv2d_1 (Conv2D)           (None, 11, 11, 64)        18496
+        
+        max_pooling2d_1 (MaxPooling  (None, 5, 5, 64)         0
+        2D)
+        
+        flatten_1 (Flatten)         (None, 1600)              0
+        
+        dropout (Dropout)           (None, 1600)              0
+        
+        dense_3 (Dense)             (None, 10)                16010
+        
+        ========================================
+        Total params: 34,826
+        Trainable params: 34,826
+        Non-trainable params: 0
+</output>
+<br>
+Okay, let's understand what is happening here. <br><br>The output shape of the Conv2d layer is (None, 26,26,32) which means that it can output any number of (<i>None</i>) tensors (or you can say matrices) of size 26 x 26 x 32. This is because in our Conv2d layer in the sequential model_cnn, we defined the number of filters as 32 and the kernel size as (3,3). The kernel works on our input matrix row by row and column by column. The output size of a matrix that we would by applying a kernel of (3,3) size on an input of size (28,28) and no padding and a stride (gap between two subsequent kernel operation on our input matrix along the row or column) of size 1 is: (28 - 3 + 1) x (28 - 3  + 1) = 26 x 26. This comes from the formula for getting the output size: <br><br> <span style="color: red;">Oh = (Ih - Kh + Pr + Sr) / Sr</span><br><br>
 
+Where Oh = Height of output matrix <br>
+Ih = Height of input matrix <br>
+Kh = Height of Kernel <br>
+Pr = Padding along row (put value as 1 if we pad by 1 on both sides of our matrix) <br>
+Sr = Stride along row
+<br><br>
+Now, each filter works on all the (last) dimensions of our input and sums up the value that it gets by applying the kernel on each individual (last) dimension of the input to give us an output of a single dimension. This means that if we have an RGB image of size 180 x 180, which means that the shape of the RGB image is (180, 180, 3), then a single filter would apply kernel operations on each of the (last) dimension - that is each channel of the input and then sum them up to give us a single channel output. Hence having 32 filters gives us an output of size 26 x 26 x 32. I hope this explanation was clear!  (If it wasnt, please <a href="www.richidubey.com/contact.html">contact</a> me and I will get back to you and improve this post).
 
 
           
-        </article>
+    </article>
     </body>
 
 </html>
