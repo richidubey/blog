@@ -26,7 +26,7 @@ code{
 
 output {
     display: block;
-    border: 1px solid grey;
+    border: 1px dotted grey;
     white-space: pre-line;
     margin-top: 1em;
     margin-bottom: 1em;
@@ -39,4 +39,8 @@ comment{
 
 .whitespace{
     white-space: pre;
+}
+
+.end-note{
+    margin-top: 1em;
 }

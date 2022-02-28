@@ -35,7 +35,7 @@
                     <br><br>
                     The images in the dataset look like this:  
                     <br>
-                    <img src="images/handwritten_digit_mnist_example.png">
+                    <img src="images/handwritten-digit-recognitions-using-dnn/handwritten_digit_mnist_example.png">
                     
                     <br><br>
                     We will use keras to implement the model and to load,preprocess the data. We use keras because is a simple (and fast!) to use library which allows us to develop deep learning models without having to implement everything on our own. If you are really just starting out, implementing some of the basic things that keras automatically takes care of, like backtracking and gradient computation, can be helpful in understand how the neural networks actually work. Refer to <a href="https://colab.research.google.com/drive/15L51sdwIeylKQV-BZm2wCEfR9dJT7-Zi?usp=sharing" target="_blank">this</a> notebook to learn how to do these things on your own (without relying on a library). 
@@ -75,7 +75,7 @@
                     </code>
 
             <output>
-                    <img src="images/handwritten_digit_mnist_code_2.png">
+                    <img src="images/handwritten-digit-recognitions-using-dnn/handwritten_digit_mnist_code_2.png">
             </output>
 
             Our image data is in a greyscale format, this means that
@@ -268,7 +268,46 @@ Epoch 3/3
     As we can see, the accuracy on test data is over 98% for the CNN model. 
     <br>
     Here, both batch_size and epochs are hyperparameters that can be tuned using KerasTuner - which rotates the values of these hyperparameters between a set of values or a range of values (with a step value provided as parameter) and saves the values that achieves the objective provided to it (can be getting the least loss or achieving the best accuracy or something <a href="https://keras.io/api/metrics/" target="_blank"">else</a>). 
+
+
+    </p>
+
+    <p>
+        <h3>Step 5: Making predictions with our model</h3>
+        
+        Yay! We have finally reached the most exciting part of our journey. We can ask our model to predict unseen images of handwritten digits.
+
+        
+
+<code>pyplot.imshow(x_test[1], cmap=pyplot.get_cmap('gray'))
+    pyplot.show()
+    
+    prediction = model.predict(np.expand_dims(x_test[1],0))
+    print(np.argmax(prediction), " is predicted with a ", round(prediction[0][np.argmax(prediction)] * 100,2), "% certainity")
+    
+    
+    prediction_cnn = model_cnn.predict(np.expand_dims(x_test[1],0))
+    print(np.argmax(prediction_cnn), " is predicted with a ", round(prediction_cnn[0][np.argmax(prediction_cnn)] * 100,2), "% certainity with the CNN model")
+</code>
+<output><img src="images/handwritten-digit-recognitions-using-dnn/handwritten_digit_mnist_prediction_output.png">
+
+    2  is predicted with a  99.9 % certainity
+    2  is predicted with a  99.99 % certainity with the CNN model
+</output>
+
+The reason we are passing the image to be predicted inside a np.expand_dims() function is that our model expects inputs with the shape (None, 28, 28) whereas the shape of our image is (28,28). Using np.expand_dims we can insert a new axis at the axis position 0 (that we passed as the second parameter). This is equivalent to using <code>x_test[1][np.newaxis, :]</code>
+    </p>
+    <p>
+        <h3>End Note</h3>
+        I have an interesting Colab notebook that goes along with this tutorial and it has a canvas element where you can draw digits and test the model on your drawn digits! Feel free to check it out! <a href="https://colab.research.google.com/drive/1PUGu_sEYoUHORQd7aARem_bTjjivxX5p?usp=sharing" target="_blank">Click here</a> to access the notebook.
+    </p>
     </article>
+
+    <div class="end-note">
+        <hr><br>
+        Thanks for reading my blog post. If you have any doubt or comments, please  <a href="https://www.richidubey.com/contact.html" target="_blank">contact</a> me and I will get back to you and update this post if necessary!
+        <br><br><hr>
+    </div>
     </body>
 
 </html>
