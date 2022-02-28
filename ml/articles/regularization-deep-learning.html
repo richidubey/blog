@@ -1,0 +1,78 @@
+<html>
+    <head>
+        <title>Regularization in Deep Learning</title>
+        <link rel="stylesheet" href="articles.css">
+    </head>
+    <body>
+        <h1>
+            Regularization in Deep Learning
+            <small>
+                From <a href="../index.html">Machine Learning Blog by Richi</a>
+            </small>
+        </h1>
+        <article>
+            <p>Regularization is used to avoid overfitting and for feature selection. There are two types of regularization, L1 regularization and L2 regularization.</p>
+
+            <p>
+                <h3>L1 Regularization</h3>
+
+                L1 regularization is also known as L1 norm or Lasso. Actually, a <i>regression </i>model that uses L1 regularization technique is called Lasso regression.
+
+                <br><br>
+                L1 regularization combats overfitting by shrinking the parameters towards 0. It is a form of feature selection since making a feature (parameter) 0 unselects those features and selects the remaining features (parameters).
+                
+                <br><br> When we are using L1 regularization, the cost function equation becomes: 
+
+                <img src="images/regularization-deep-learning/l1-equation.png" style="display: block; margin: 0 auto;">
+                
+                In L1 regularization, we penalize the absolute values of weight; this avoids large parameters and thus avoids overfitting. 
+
+                <br><br>
+                The derivative of L1 is lambda (a constant). It can be thought of as a force that subtracts some constant (lambda) from the weight every time. Since we use absolute values, L1 has a discontinuity at 0, which causes subtraction results that cross 0 to get zeroed out.  
+            </p>
+
+            <p>
+                <h3>L2 Regularization</h3>
+
+                L2 regularization is also known as L2 norm or Ridge. Actually, a <i>regression </i>model that uses L2 regularization technique is called Ridge regression.
+
+                <br><br>
+
+                In L2 regularization, less significant features would still influence final prediction, but the influence would be minimal.
+
+                <br><br>
+
+                When we are using L2 regularization, the cost function equation becomes: 
+
+                <img src="images/regularization-deep-learning/l2-equation.png" style="display: block; margin: 0 auto;">
+
+                Layers that use L2 regularization return a non-sparse solution since the weights will be non-zero. L2 regularization is not robust to outliers - since the squared term blows up the differences in the errors of the outliers. The regularizer then attempts to fix this by penalizing the weight.
+                
+                <br><br>
+                Derivative of L2 is 2 x weight x lambda. It can be thought of as a force that removes the weight percentage (w %) of the weight every time. Even if you remove x % of a number a billion times, the diminished number would never reach zero.
+
+            </p>
+            <p>
+                <h3>Further Comparisons between L1 and L2 regularization</h3>
+
+                <h5>Robustness</h5>
+
+                Robustness means having an accurate output, even when one or more values are drastically changed due to unforeseen circumstances. <br><br>L1 regularization is more robust than L2 regularization because L1 takes the absolute values of weight; hence the cost only increases linearly, whereas L2 takes the squares of weight, so the cost of outliers present in data increases exponentially. 
+
+<!-- 
+                https://www.mathcha.io/editor -->
+
+
+            </p>
+          
+        </article>
+        
+        <div class="end-note">
+            <hr><br>
+            Thanks for reading my blog post. If you have any doubt or comments, please  <a href="https://www.richidubey.com/contact.html" target="_blank">contact</a> me and I will get back to you and update this post if necessary.
+            <br><br><hr>
+        </div>
+
+    </body>
+
+</html>
