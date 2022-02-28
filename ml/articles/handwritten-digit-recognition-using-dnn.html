@@ -42,18 +42,17 @@
                     
                     <br><br>
                     We can load the dataset directly from keras, since keras includes a few dataset and MNIST happens to be a part of it. 
-                    <br><br>
+                    
                     <code>(x_train, y_train), (x_test, y_test) = keras.datasets.mnist.load_data();</code>
             </p>
 
-            <br>
             <p>
                 <h3>Step 2: Visualizing the data</h3>
            
 
             Its always a good idea to look at and understand our data.
 
-            <br><br>
+            
             <code>print(x_train.shape)
                 print(x_train[0].shape) 
                 print(x_train[0])</code>
@@ -64,10 +63,10 @@
                     [  0   0   0   0   0   0   0   0   0   0   0   0   3  18  18  18 126 136
                     175  26 166 255 247 127   0   0   0   0] 
                     ...</output>
-            <br>
+            
             This shows that our training data has 60000 images of 28*28 pixel values, with pixel values ranging from 0-255. Lets print one of the images.
 
-            <br><br>
+            
             <code>from matplotlib import pyplot
 
                     pyplot.imshow(x_train[0], cmap=pyplot.get_cmap('gray'))
@@ -79,13 +78,11 @@
                     <img src="images/handwritten_digit_mnist_code_2.png">
             </output>
 
-            <br>
             Our image data is in a greyscale format, this means that
             each pixel value actually denotes the intensity of that pixel, i.e. how dark that pixel is - ranging from 0 (completely white) to 255 (pitch dark). Other format that images take are RGB and RGBA (A for alpha channel - which indicates the opacity of a pixel). For the latter two formats, the shapes would be (height, width, 3) and (height, width, 4) respectively.
 
         </p>
 
-        <br>
         <p>
             <h3>Step 3: Defining the model</h3>
             
@@ -94,7 +91,6 @@
             <br><br>
             Lets implement the first model.
             
-            <br>
             <code>inputs = keras.Input(shape = (28,28))
 
                     x = keras.layers.Rescaling(1.0 / 255) (inputs) <comment>#This is used to change the range of inputs. When we rescale our input (which is in range [0,255]) by 1/255, our inputs get translated to range [0,1]. </comment>
@@ -133,7 +129,7 @@
         Non-trainable params: 0
         ______________________________
             </output>
-            <br>
+            
             None as the first value in the input shape indicates that the model can take in any number (batch-size) of inputs (with 28 * 28 dimension)
 
             <br><br>
@@ -179,8 +175,8 @@
         Trainable params: 34,826
         Non-trainable params: 0
 </output>
-<br>
-Okay, let's understand what is happening here. <br><br>
+
+Okay, let's understand what is happening here. <br>
 
 <h5>About Conv2d layer</h5>The output shape of the Conv2d layer is (None, 26,26,32) which means that it can output any number of (<i>None</i>) tensors (or you can say matrices) of size 26 x 26 x 32. This is because in our Conv2d layer in the sequential model_cnn, we defined the number of filters as 32 and the kernel size as (3,3). The kernel works on our input matrix row by row and column by column. 
 
@@ -209,7 +205,45 @@ To understand the output size of the Max Pooling layer, just apply the same form
 
 <h5>About Dropout Layer</h5>
 
-The Dropout layer is used to 
+The Dropout layer is used to regularize Deep Learning models. We need regularization because these models tend to overfit quite easily. Other ways of regularizing is L1 and L2 regularizer which add an extra term in the cost function to penalize absolute value of weight and the square of weight respectively (These methods do not work as effectively as drop out due to <i>co-adaptation</i>). Passing a value of .5 in the parameter to Dropout layer drops the value of input to 0 randomnly with a frequency of .5. The values that are not dropped gets increased to 2 to make sure that the sum over all inputs are unchanged. By doing this, the gradient of regularized network becomes equal to the expectation of gradient of a dropout layer (with multiplied input values) which <i>means that minimising the dropout loss is equivalent to minimising a regularized network</i>.
+
+<br><br>
+Dropout layers only work during the training phase and are deactivated automatically during the inferencing (when making predictions) phase by Keras.
+
+</p>
+<p>
+    <h3>Step 4: Training the model</h3>
+
+    This is the last step before we would be able to make predictions.
+
+
+    <code>model.compile(optimizer = 'adam', loss='sparse_categorical_crossentropy', metrics = [ keras.metrics.SparseCategoricalAccuracy(name="acc")] )
+        
+        batch_size = 64
+        
+        <comment>#Now we will try to fit the data on our model - this will train the model and tune the weights</comment>
+        history = model.fit(x_train, y_train, batch_size = batch_size, epochs = 1)
+        print(history.history)
+        
+        loss, acc = model.evaluate(x_test, y_test);
+        
+        print(loss)
+    </code>
+
+    Here we use Adam as an optimizer since Adam is a better optimizer than sgd since different learning rate is maintained for different weights,which is unlike sgd where all the weights (both at front of network and at end) have the same learning rate
+    <br><br>
+    The loss we use is sparse_categorical_crossentropy which computes the cross entropy between label and predictions. Labels are expected to be provided as integers. If you have one-hot encoded labels, you have to use categorical_crossentropy loss.<br><br>
+    Also, some other metric that we can use include: SparseTopKCategoricalAccuracy, SparseCategoricalCrossEntropy which shows how often our targets are in top K prediction and the cross entropy between predicted and true value respectively.
+    
+    <code><comment>#Hyperparameters - can be tuned manually or with KerasTuner</comment>
+        batch_size = 32
+        epochs = 3
+        
+        model_cnn.compile(loss = "sparse_categorical_crossentropy", optimizer="adam", metrics=["accuracy"])
+        
+        
+        model_cnn.fit(x_train, y_train, batch_size = batch_size, epochs = epochs, validation_split = 0.1)
+    </code>
     </article>
     </body>
 
