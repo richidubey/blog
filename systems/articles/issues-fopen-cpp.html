@@ -14,13 +14,13 @@
     </head>
     <body>
         <h1>
-            Issues with open() call in C++  
+            Issues with fopen() call in C++  
             <small>
                 From <a href="../index.html">Systems Blog by Richi</a>
             </small>
         </h1>
         <article>
-            When working with file operations, we often use open and close for pointer allocation to a file handle.
+            When working with file operations, we often use fopen and fclose for pointer allocation to a file handle.
 
             <code>FILE *fHandle;
 
@@ -28,9 +28,15 @@
 
             ...
             
-            fHandle.close();
+            fHandle.fclose();
         </code>
-              
+
+
+
+        I encountered a strange bug when developing a driver for communication between a central linux server and 300+ sensor systems running on Windows CE 3.0 at CERN.
+        
+        
+
         </article>
 
     </body>
