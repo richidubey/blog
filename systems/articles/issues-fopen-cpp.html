@@ -9,7 +9,7 @@
 
   gtag('config', 'G-JX1VE85ZNC');
 </script>
-	<title>Sample Article</title>
+	<title>Issues with fopen() call in C</title>
         <link rel="stylesheet" href="articles.css">
     </head>
     <body>
@@ -55,9 +55,45 @@
         And the algorithm to send the file content is: 
 
         <image src="images/FileTransferAlgo.png" style="margin: 0 auto; margin-top: 2em; max-width: 720px; line-height: 1.3;"/>
+        <br><br>
+        The program that runs on the sensor systems would send the file name first, wait for a confirmation (##DRV_ACK##), then send file content line by line 
+        and would send a special marker ##PNL_ACK## to mark the end of file content. It would wait to receive a marker from Driver (##DRV_ACK##) and then
+        delete the file and send the next file.
+        <br><br>
+        We need step 3 (Wait for confirmation) so that the driver knows the distinction between a filename and the file content. 
+        <br>
+        <br>File names are like: 005_202306220134.log, 005_202306220135.log, 005_202306220136.log etc. The pattern of filename is (MS_ID - id of the sensor)_(YYYYMMDD)(HHMM).
+        <br>
+        <br>and the file content for 005_202306220134.log is:<br>
+        <code>13220;22/6/2023 1:34:0;0;155;;45099.06527878;1.10096870E+002;1545;;
+13221;22/6/2023 1:34:0;0;155;;45099.06527878;1.21187496E+001;9;;
+13222;22/6/2023 1:34:0;0;155;;45099.06527878;3.46953125E+002;1993;;
+13224;22/6/2023 1:34:0;0;155;;45099.06527878;1.02101557E-003;1929;;
+13223;22/6/2023 1:34:0;0;155;;45099.06527878;3.06914082E+001;1769;;
+13225;22/6/2023 1:34:0;0;155;;45099.06527878;4.22499981E-003;3401;;
+13226;22/6/2023 1:34:0;0;155;;45099.06527878;5.42372672E+008;9;;
+13220;22/6/2023 1:35:2;4;-1;;45099.06527878;1.10096870E+002;1545;;
+13221;22/6/2023 1:35:2;4;-1;;45099.06527878;1.21187496E+001;9;;
+13222;22/6/2023 1:35:2;4;-1;;45099.06527878;3.46953125E+002;1993;;
+13224;22/6/2023 1:35:2;4;-1;;45099.06527878;1.02101557E-003;1929;;
+13223;22/6/2023 1:35:2;4;-1;;45099.06527878;3.06914082E+001;1769;;
+13225;22/6/2023 1:35:2;4;-1;;45099.06527878;4.22499981E-003;3401;;
+13226;22/6/2023 1:35:2;4;-1;;45099.06527878;5.42372672E+008;9;;
+</code>
+        Here the number (13221,13222,13224 etc.) in the front denotes the channel Id, which could be the ID for pH parameter of the water or its turbidity or the detected radiation level in Sieverts (in case of a radiation sensor).
+        Other details about the content of the file:
 
-        The general 
-        
+        <code>Chid;unix-timestamp-miliseconds;mesval;unit;sampletype;alarmstatus;status;workin_mode;
+
+    - Chid : Channel id as in table REMUS.CHANNEL
+    - unix-timestamp-miliseconds: Unix timestamp in milliseconds
+    - mesval: measured value
+    - unit: measurement unit id as in table UNIT
+    - sampletype: 0= raw value no alarm; 1=raw value alarming; 3=hour value; 4=minute value
+    - alarmstatus: 0 = No Alarm, 1 =Alarm, 2 =High Alarm
+    - status: 1 = Channel OK, 0=Channel NOT OK (Fault)
+    - workin_mode: working mode as in table EVENT_WKMODE</code>
+
         </article>
 
     </body>
