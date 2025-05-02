@@ -1,0 +1,111 @@
+<html>
+    <head>
+        <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-JX1VE85ZNC"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-JX1VE85ZNC');
+</script>
+	<title>Building Dreamy Desert Night - Computer Graphics</title>
+        <link rel="stylesheet" href="./articles-no-code.css">
+         <!-- <link rel="stylesheet" href="articles.css"> -->
+        <link rel="stylesheet" href="https://stackedit.io/style.css" />
+    </head>
+    <body>
+        <h1>
+            Building Dreamy Desert Night - Computer Graphics Final Project
+            <small>
+                From <a href="../index.html">Blogs</a>
+            </small>
+        </h1>
+        <article>
+            <p>I started out by building a plane sand terrain first, which could just be an SDF (signed distance function) constant distance from the y plane:</p>
+            <img src="./assets/dreamy_desert_night/1.png" alt="Terrain SDF" />
+            
+            <p>Then to try a simple formula for sand dunes, I tried with a combination of sin and cos waves across our x - z axis. X and Z axis are across the screen while the y axis moves up and down.</p>
+            <img src="./assets/dreamy_desert_night/2.png" alt="Sin Cos Dunes" />
+            
+            <p>The shadows in our sand dunes come from diffused lighting:</p>
+            <img src="./assets/dreamy_desert_night/Pasted image 20250502062623.png" alt="Diffuse lighting" />
+            
+            <p>This is standard calculation for lighting where we get the color of a texture by multiplying it with the dot product of viewing direction and light direction (so if you are looking directly at the sand dunes from the direction of the light, you will see actual color of the sand dunes, but you will see darker color (lesser incident light) if you are inclined away from the light).</p>
+            
+            <p>For camera movement, first is the always forward moving camera - for which I multiplied the camera origin by iTime and some constant value which indicates the speed of the camera. Then for rotating the camera around the world, I multiplied ray direction by shifting the forward facing camera direction by 90 degree every 5 seconds for gradual movement by using a mix function.</p>
+            <img src="./assets/dreamy_desert_night/3.png" alt="Camera direction" />
+            <video controls src="./assets/dreamy_desert_night/Rotating And Moving Camera 3.webm"></video>
+            
+            <p>To get more complex sand dunes structures, I experiment with perlin noise instead of cos and sine waves</p>
+            <img src="./assets/dreamy_desert_night/4.png" alt="Perlin noise dunes" />
+            <video controls src="./assets/dreamy_desert_night/For 4.webm"></video>
+            
+            <p>One can get more indented textures and rougher details in the sand dunes by using Fractal Brownian Motion - which is just adding more perlin noise on top of the existing perlin noise but with smaller amplitudes and higher frequencies. We can do this addition as many times as we want but it slows down the fps of the rendering. I also started experimenting with ideas for clouds at this point.</p>
+            <img src="./assets/dreamy_desert_night/6 - varying octaves 1.png" alt="FBM dunes" />
+            
+            <p>For clouds, I again used perlin noise (with FBM) and mapped it to the screen and tried to cover between 40 - 70% with clouds based on perlin noise value with ray direction for randomness.</p>
+            <img src="./assets/dreamy_desert_night/6 - varying octaves 4.png" alt="Clouds 1" />
+            <img src="./assets/dreamy_desert_night/Pasted image 20250502073217.png" alt="Clouds 2" />
+            
+            <p>Night sky looks better for a dreamy world, hence I tried with darker shades of skycolor and pinkish violet color for the clouds. I also added fog (by using air as a participating media) in the scene so that it look more natural - dunes farther away look more darker now.</p>
+            <p>With Fog:</p>
+            <img src="./assets/dreamy_desert_night/Pasted image 20250502073630.png" alt="With fog" />
+            
+            <p>Without fog:</p>
+            <img src="./assets/dreamy_desert_night/Pasted image 20250502073654.png" alt="Without fog" />
+            
+            <p>Then I added stars, which are the most magical part of the entire scene. I added stars by using - take a guess - yes! perlin noise again. I made them twinkle by dimming their colors based on sin wave and also made the twinkling random by again using perlin noise to decide which group of stars will twinkle in a particular period. I also made sure that the entire sky does not get dimmed by restricting the dimmness of the star to 30% of its maximum brightness.</p>
+            <img src="./assets/dreamy_desert_night/Pasted image 20250502073803.png" alt="Twinkling stars" />
+            <video controls src="./assets/dreamy_desert_night/For 8 1.webm"></video>
+            
+            <p>Now that I think about it, it would be really cool to add shooting stars too! 🤩</p>
+            
+            <p>Then I added a moon, which is just solid white color in a particular radius of viewing angle (to make it round) and gave it a glow around its edges by mixing color with slightly dimmer white.</p>
+            <img src="./assets/dreamy_desert_night/Pasted image 20250502074317.png" alt="Moon with glow" />
+            
+            <p>Finally I added water by checking a threshold value for the height of the sdf, i.e, if the terrain is below 2 units, it is a potential place to have a lake. I did not want every area with lower than 2 hit to get a lake since that looked very boring. Hence I added a perlin noise here too to randomly place water at locations around the scene. To render the water, I used fresnel diffraction, which includes calculating viewing angle to change how much reflection of the sky is present in the lake.</p>
+            <img src="./assets/dreamy_desert_night/Pasted image 20250502074646.png" alt="Lakes using fresnel" />
+            
+            So, this is what the final render then looks like:
+
+            <video controls src="./assets/dreamy_desert_night/smallFinal.webm"></video>
+            
+
+
+            <p>Link to the shadertoy: <a href="https://www.shadertoy.com/view/33BXDw">https://www.shadertoy.com/view/33BXDw</a></p>
+            <p>Video of the final render: <a href="https://youtu.be/BwjAYHWadrU">https://youtu.be/BwjAYHWadrU</a></p>
+            
+
+
+<!-- Start Discuss Part  -->
+ <hr>
+<div id="disqus_thread"></div>
+<script>
+    /**
+    *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+    *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables    */
+    /**/
+    var disqus_config = function () {
+    this.page.url = window.location.href;;  // Replace PAGE_URL with your page's canonical URL variable
+    this.page.identifier = window.location.pathname; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+    };
+    
+    (function() { // DON'T EDIT BELOW THIS LINE
+    var d = document, s = d.createElement('script');
+    s.src = 'https://richidubey.disqus.com/embed.js';
+    s.setAttribute('data-timestamp', +new Date());
+    (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+<!-- End Discuss Part  -->
+
+
+</div>    
+</article> 
+
+    </body>
+    <script src="https://cdn.jsdelivr.net/gh/MarketingPipeline/Markdown-Tag/markdown-tag.js"></script> 
+</html>
