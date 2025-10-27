@@ -18,7 +18,7 @@
         <h1>
             Tiled Matrix Multiplication in GPU
             <small>
-                From <a href="../index.html">Systems Blog</a>
+                From <a href="../index.html">Blogs</a>
             </small>
         </h1>
         <article>
@@ -38,49 +38,63 @@ int col = blockIdx.x * blockDim.x + threadIdx.x;</code></pre>
                 <p>For getting the row, we first shift by how much down our block (or our tile) is (by using its y coordinate - we shift it block width times) and then we shift further down below by how much the y coordinate of the thread inside our block is. For ex., from slide 6, the row of the block in B for b44 thread would be: 1(since block’s x,y coordinate are 1,1)x2(since block dim is 2,2) + 1 (since the threads coordinate inside the block is 1,1) = 3.</p>
                 <p>Similarly, for getting the column value, we shift right by how much right our block is(by taking its x coordinate and multiplying it with block width) and then shift right again by how much right our thread inside the block is (which is the x coordinate of the thread). For ex., from slide 6, the col of the block in B for b33 thread would be: 1(since block’s x,y coordinate are 1,1)x2(since block dim is 2,2) + 0 (since the threads coordinate inside the block is 0,0) = 2.</p>
                 <p>Then we allocate space for the shared tile (shared across the block of threads)</p>
-                <pre><code>__shared__ float sharedA[TILE_WIDTH][TILE_WIDTH];
-__shared__ float sharedB[TILE_WIDTH][TILE_WIDTH];</code></pre>
+                <pre><code>__shared__ float blockA[TILE_WIDTH][TILE_WIDTH];
+__shared__ float blockB[TILE_WIDTH][TILE_WIDTH];</code></pre>
                 <p>And finally we come to the main part of our calculation:</p>
-                <pre><code>// Iterate over tiles of input matrices
-for (int tile = 0; tile &lt; matrixWidth / TILE_WIDTH; tile++) {
+                <pre><code>//To get value for a single output (Which is what this particular thread executing MatrixMulGPU is trying to do)
+//we need to go through A and B matrixWidth/TILING_SIZE times. 
+for (int tilenum = 0; tilenum &lt; matrixWidth / TILE_WIDTH; tilenum++) {
 
-// Load values into the shared memory
+    //Now to get actual value, we need to shift the block appropriately
+    //across the A and B matrix
 
-sharedA[threadIdx.y][threadIdx.x] = A[row * matrixWidth + (tile * TILE_WIDTH + threadIdx.x)];
+    blockA[threadIdx.y][threadIdx.x] = A[row * matrixWidth + (tilenum * TILE_WIDTH + threadIdx.x)];
 
-sharedB[threadIdx.y][threadIdx.x] = B[(tile * TILE_WIDTH + threadIdx.y) * matrixWidth + col];
+    //We are taking value just for the current thread, so we get location in block
+    //by first shifting with row count and then locating the approapriate place with tile index
 
-// Synchronize threads of a block
-__syncthreads();
+    //To get column in B, we shift through matrixWidth by checking which tile index to access
+    //We take threadIdx.y here because the position in B matrix is determined by which row
+    //we want to fill in our final block (the resultant intermediate tile from mutplication of A and B)
+    //Ex., for 2nd row, we want to shift by 2 of matrixWidth in B before we get to our block  
 
-// Perform multiplication and accumulate results into thread-local memory
-for (int k = 0; k &lt; TILE_WIDTH; ++k) {
+    blockB[threadIdx.y][threadIdx.x] = B[(tilenum * TILE_WIDTH + threadIdx.y) * matrixWidth + col];
 
-sum += sharedA[threadIdx.y][k] * sharedB[k][threadIdx.x];
-}
+    __syncthreads();
+    //Synchronise across all threads across the block (So, all the threadsPerBlock will fill in the both blockA and block B with 
+    // TILING_SIZE*TILING_SIZE values)
 
-// Synchronize threads of a block
-__syncthreads();
+    //Do the multiplication and addition
+
+
+    for (int k = 0; k &lt; TILE_WIDTH; ++k) {
+        //Now, blockA and block B are small blocks that we took out from A,B
+        //To get the final sum, we dont care about row and col, just thread indexes
+        sum += blockA[threadIdx.y][k] * blockB[k][threadIdx.x];
+    }
+
+    // Synchronize threads of a block
+    __syncthreads();
 
 }</code></pre>
 <p>Let’s go through each part of the code one by one.</p>
-<pre><code>for (int tile = 0; tile &lt; matrixWidth / TILE_WIDTH; tile++) {
+<pre><code>for (int tilenum = 0; tilenum &lt; matrixWidth / TILE_WIDTH; tilenum ++) {
 </code></pre>
-<p>The temp matrix is (iteratively) added up across all the time we slide the tile across matrixWidth (which is equal to matrixWidth/tileWidth) to calculate values for a tile in C (for ex., we slide the tile 3 times - in image 1,2,3 to get values for the first tile in C), so we get the loop bounds as <code>tile = 0; tile &lt; matrixWidth / TILE_WIDTH; tile++</code>.</p>
+<p>The temp matrix is (iteratively) added up across all the time we slide the tile across matrixWidth (which is equal to matrixWidth/tileWidth) to calculate values for a tile in C (for ex., we slide the tile 3 times - in image 1,2,3 to get values for the first tile in C), so we get the loop bounds as <code>tilenum = 0; tilenum &lt; matrixWidth / TILE_WIDTH; tilenum++</code>.</p>
 <p>Also, from the animation, notice how in the temp matrix the row values come from A (for ex. from image 3: a23, a24 comes in temp[2,1] because we are in the second row of&nbsp; temp) but the column values come from B (b32, b42 when in 2nd column of temp otherwise b31, b41). Hence, while iterating the tiles, we shift row wise in A but column wise in B.</p>
-<pre><code>sharedA[threadIdx.y][threadIdx.x] = A[row * matrixWidth + (tile * TILE_WIDTH + threadIdx.x)];
+<pre><code>blockA[threadIdx.y][threadIdx.x] = A[row * matrixWidth + (tilenum * TILE_WIDTH + threadIdx.x)];
 
-sharedB[threadIdx.y][threadIdx.x] = B[(tile * TILE_WIDTH + threadIdx.y) * matrixWidth + col];
+blockB[threadIdx.y][threadIdx.x] = B[(tilenum * TILE_WIDTH + threadIdx.y) * matrixWidth + col];
 </code></pre>
 <p>So, we fill out the shared block by focusing only on the value that the current thread will fill (since other threads in the block will fill up other values in the shared block/tile). Since there are as many threads in a block as there are values to be filled in the tile, we just fill it by the thread’s x and y coordinate.<br>
-Because of our explanation in the previous paragraph, we fill out the value in sharedA block by first shifting the position by row x matrixWidth location and then adding the x coordinate of the thread, and finally adding how much the tile shifting contributes to the location of the thread (which is tilenumber x tileWidth) which equates to <code>A[row * matrixWidth + (tile * TILE_WIDTH + threadIdx.x)]</code>. Similarly, for sharedB block, we iterate column wise, hence to get the location of the value from B, we shift down according to tilenum (tilenum x tileWidth)and the y coordinate of the thread inside the block/tile (by threadIdx.y) and finally shift right by actual col value to get <code>B[(tile * TILE_WIDTH + threadIdx.y) * matrixWidth + col]</code>.</p>
+Because of our explanation in the previous paragraph, we fill out the value in blockA block by first shifting the position by row x matrixWidth location and then adding the x coordinate of the thread, and finally adding how much the tile shifting contributes to the location of the thread (which is tilenumber x tileWidth) which equates to <code>A[row * matrixWidth + (tilenum * TILE_WIDTH + threadIdx.x)]</code>. Similarly, for blockB block, we iterate column wise, hence to get the location of the value from B, we shift down according to tilenum (tilenum x tileWidth)and the y coordinate of the thread inside the block/tile (by threadIdx.y) and finally shift right by actual col value to get <code>B[(tilenum * TILE_WIDTH + threadIdx.y) * matrixWidth + col]</code>.</p>
 <pre><code>__syncthreads();
 </code></pre>
 <p>Then we sync across the threads in the block by using <code>__syncthreads()</code> to make sure that all the values in the shared tile have been populated by other threads in this block.</p>
 <pre><code>for (int k = 0; k &lt; TILE_WIDTH; ++k) 
-	sum += sharedA[threadIdx.y][k] * sharedB[k][threadIdx.x]; 
+	sum += blockA[threadIdx.y][k] * blockB[k][threadIdx.x]; 
 </code></pre>
-<p>And finally we iterate across tileLength to sum up the multiplication by going across row wise in sharedA block (i.e. for sharedA block, x coordinate comes from thread’s y index and the y coordinate comes from position within the tile - the x and y coordinates for the block are kind of reversed because of how memory allocation works in C/C++  - the x coordinate actually tells how much far down to go if that makes sense - which is why we take <code>sharedA[threadIdx.y][k]</code>) and column wise in sharedB block (similarly here, the x coordinate comes from index in tile and the y comes from thread’s x coordinate to finally get <code>sharedB[k][threadIdx.x]</code>).</p>
+<p>And finally we iterate across tileLength to sum up the multiplication by going across row wise in blockA block (i.e. for blockA block, x coordinate comes from thread’s y index and the y coordinate comes from position within the tile - the x and y coordinates for the block are kind of reversed because of how memory allocation works in C/C++  - the x coordinate actually tells how much far down to go if that makes sense - which is why we take <code>blockA[threadIdx.y][k]</code>) and column wise in blockB block (similarly here, the x coordinate comes from index in tile and the y comes from thread’s x coordinate to finally get <code>blockB[k][threadIdx.x]</code>).</p>
 <pre><code>__syncthreads();
 </code></pre>
 <p>We sync across the threads in the block by using <code>__syncthreads()</code> before moving over to the next tile (out of matrixWidth/tileWidth) tiles.</p>
